@@ -4,6 +4,8 @@ import org.json.JSONObject;
 
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
@@ -13,6 +15,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.firebase.client.Firebase;
 
@@ -29,6 +32,10 @@ public class MainActivity extends ActionBarActivity
 	
 	private Network network;
 	
+	private Context context;
+	
+	private boolean accelLogging = false;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
@@ -36,6 +43,8 @@ public class MainActivity extends ActionBarActivity
 		//startService(new Intent(this, AccelerometerLogService.class));
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+	
+		context = getApplicationContext();
 		
 		pushDialog = new ProgressDialog(MainActivity.this);
 		pushDialog.setTitle("Syncing data");
@@ -55,11 +64,22 @@ public class MainActivity extends ActionBarActivity
 			public void onClick(View v)
 			{
 				// === query Misfit data
-				String[] timestamps = new String[100];
-				String[] data = new String[100];
-				Hardware.queryMisfit(timestamps, data);
-				
-				network.pushData(timestamps, data, pushDialog);
+//				String[] timestamps = new String[100];
+//				String[] data = new String[100];
+//				Hardware.queryMisfit(timestamps, data);
+//				
+//				network.pushData(timestamps, data, pushDialog);
+				if(!accelLogging)
+				{
+					Toast.makeText(context, "Started", Toast.LENGTH_SHORT).show();
+					startService(new Intent(context, AccelerometerLogService.class));
+				}
+				else
+				{
+					Toast.makeText(context, "Stopped", Toast.LENGTH_SHORT).show();
+					stopService(new Intent(context, AccelerometerLogService.class));
+				}
+				accelLogging = !accelLogging;
 			}
 		});
 		ImageButton endomondoSyncButton = (ImageButton) findViewById(R.id.button_endomondo_sync);

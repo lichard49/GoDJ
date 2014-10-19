@@ -7,6 +7,8 @@ import java.util.TimerTask;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import com.firebase.client.Firebase;
+
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -34,9 +36,11 @@ public class AccelerometerLogService extends Service {
     private int mValueIndex = 0;
     private long mTimeStamp = 0;
     private ExecutorService mExecutor = null;
+    private Timer t;
     private final int LOGGINGARRAYSIZE=25;
     private Handler handler = new Handler();
     private int syncToFirebase = 0;
+    private Firebase root;
 
     public AccelerometerLogService() {
         super();
@@ -54,7 +58,9 @@ public class AccelerometerLogService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        Toast.makeText(getBaseContext(), "Service onCreate", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(getBaseContext(), "Service onCreate", Toast.LENGTH_SHORT).show();
+        Firebase.setAndroidContext(this);
+		root = new Firebase("https://lichard49.firebaseio.com/GoDJ");
     }
 
     @Override
@@ -116,7 +122,8 @@ public class AccelerometerLogService extends Service {
                                 	float s = deltaX+deltaY+deltaZ;
                                 	//SEND S TO THE DATABASE HERE
                                 	syncToFirebase = 0;
-                                	Toast.makeText(mContext, s + "", Toast.LENGTH_SHORT).show();
+                                	//Toast.makeText(mContext, s + "", Toast.LENGTH_SHORT).show();
+                                	root.child("me").child("users").child(mTimeStamp+"").setValue(s);
                                 }
                                 mValueIndex = (mValueIndex+1)%LOGGINGARRAYSIZE;
                             }
@@ -134,9 +141,8 @@ public class AccelerometerLogService extends Service {
     }
 
     private void startIncrementalLogging() {
-    	Timer t = new Timer();
+    	t = new Timer();
     	t.scheduleAtFixedRate(new TimerTask() {
-
     	    @Override
     	    public void run() {
     	        syncToFirebase = 1;
@@ -150,6 +156,8 @@ public class AccelerometerLogService extends Service {
         super.onDestroy();
         Toast.makeText(mContext, "Service onDestroy", Toast.LENGTH_LONG).show();
         mIsServiceStarted = false;
+        mExecutor.shutdown();
+        t.cancel();
     }
 
     @Override
