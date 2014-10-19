@@ -4,6 +4,7 @@ import org.json.JSONObject;
 
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
@@ -38,12 +39,12 @@ public class MainActivity extends ActionBarActivity
 		pushDialog.setTitle("Syncing data");
 		pushDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
 		
-		eventLoginDialog = EventLoginDialog.getDialog(this);
+		eventLoginDialog = Dialogs.getDialog(this);
 		eventLoginDialog.show();
 		
 		Firebase.setAndroidContext(this);
-		myGoDJroot = new Firebase("https://lichard49.firebaseio.com/GoDJ/me");
-		network = new Network(myGoDJroot, getApplicationContext());
+		myGoDJroot = new Firebase("https://lichard49.firebaseio.com/GoDJ");
+		network = new Network(myGoDJroot, this);
 		
 		ImageButton misfitSyncButton = (ImageButton) findViewById(R.id.button_misfit_sync);
 		misfitSyncButton.setOnClickListener(new OnClickListener()
@@ -74,7 +75,9 @@ public class MainActivity extends ActionBarActivity
 			}
 		});
 		
+		Typeface font = Typeface.createFromAsset(getAssets(), "fonts/EricssonCapital.ttf");
 		artistNameText = (TextView) findViewById(R.id.text_artist_name);
+		artistNameText.setTypeface(font);
 		artistNameText.setOnClickListener(new OnClickListener()
 		{
 			@Override
@@ -87,11 +90,11 @@ public class MainActivity extends ActionBarActivity
 			}
 		});
 		eventNameText = (TextView) findViewById(R.id.text_event_name);
+		eventNameText.setTypeface(font);
 	}
 	
-	public void selectArtistEvent(String id)
+	public void selectArtistEvent(JSONObject data)
 	{
-		JSONObject data = network.getArtistEvent(id);
 		try
 		{
 			artistNameText.setText(data.get("artist").toString());
@@ -99,10 +102,14 @@ public class MainActivity extends ActionBarActivity
 		}
 		catch (Exception e)
 		{
-			artistNameText.setText("- No artist -");
-			eventNameText.setText("");
+			artistNameText.setText("No artist");
+			eventNameText.setText("Press here to login to an event");
 		}
-		
+	}
+	
+	public void selectArtistEvent(String id)
+	{
+		network.getArtistEvent(id);
 	}
 	
 	@Override
