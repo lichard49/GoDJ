@@ -32,6 +32,8 @@ public class MainActivity extends ActionBarActivity
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
+		//how to launch the service:
+		//startService(new Intent(this, AccelerometerLogService.class));
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
